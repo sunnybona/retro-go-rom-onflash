@@ -1,3 +1,100 @@
+How do I store the ROM in flash?
+1.修改默认为st7789
+ili9341.h 241行 修改为
+#if 0
+    ILI9341_CMD(0x01);          // Reset
+    rg_usleep(5 * 1000);        // Wait 5ms after reset
+    ILI9341_CMD(0x3A, 0X05);    // Pixel Format Set RGB565
+    #ifdef RG_SCREEN_INIT
+        RG_SCREEN_INIT();
+    #else
+        #warning "LCD init sequence is not defined for this device!"
+    #endif
+    ILI9341_CMD(0x11);  // Exit Sleep
+    rg_usleep(10 * 1000);// Wait 10ms after sleep out
+    ILI9341_CMD(0x29);  // Display on
+#endif
+
+    ILI9341_CMD(0x01);     // Reset
+    rg_usleep(5 * 1000);
+    ILI9341_CMD(0x3A, 0x55); // Pixel Format Set RGB565
+    ILI9341_CMD(0x21);  // Invert Display: 0x21 On, 0x20 Off
+    ILI9341_CMD(0xCF, 0x00, 0xc3, 0x30);
+    ILI9341_CMD(0xED, 0x64, 0x03, 0x12, 0x81);
+    ILI9341_CMD(0xE8, 0x85, 0x00, 0x78);
+    ILI9341_CMD(0xCB, 0x39, 0x2c, 0x00, 0x34, 0x02);
+    ILI9341_CMD(0xF7, 0x20);
+    ILI9341_CMD(0xEA, 0x00, 0x00);
+    ILI9341_CMD(0xC0, 0x1B);                                  // Power control   //VRH[5:0]
+    ILI9341_CMD(0xC1, 0x12);                                  // Power control   //SAP[2:0];BT[3:0]
+    ILI9341_CMD(0xC5, 0x32, 0x3C);                            // VCM control
+    ILI9341_CMD(0xC7, 0x91);                                  // VCM control2
+    ILI9341_CMD(0x36, (0x00|0x00|0x08));                      // Memory Access Control
+    ILI9341_CMD(0xB1, 0x00, 0x10);                            // Frame Rate Control (1B=70, 1F=61, 10=119)
+    ILI9341_CMD(0xB6, 0x0A, 0xA2);                            // Display Function Control
+    ILI9341_CMD(0xF6, 0x01, 0x30);
+    ILI9341_CMD(0xF2, 0x00);                                  // 3Gamma Function Disable
+    ILI9341_CMD(0x26, 0x01);                                  // Gamma curve selected
+
+    //ILI9341_CMD(0xE0, 0x0F, 0x31, 0x2B, 0x0C, 0x0E, 0x08, 0x4E, 0xF1, 0x37, 0x07, 0x10, 0x03, 0x0E, 0x09, 0x00); // Set Gamma
+    //ILI9341_CMD(0xE1, 0x00, 0x0E, 0x14, 0x03, 0x11, 0x07, 0x31, 0xC1, 0x48, 0x08, 0x0F, 0x0C, 0x31, 0x36, 0x0F); // Set Gamma
+    ILI9341_CMD(0xE0, 0xD0, 0x00, 0x05, 0x0E, 0x15, 0x0D, 0x37, 0x43, 0x47, 0x09, 0x15, 0x12, 0x16, 0x19); // Set Gamma
+    ILI9341_CMD(0xE1, 0xD0, 0x00, 0x05, 0x0D, 0x0C, 0x06, 0x2D, 0x44, 0x40, 0x0E, 0x1C, 0x18, 0x16, 0x19); // Set Gamma
+    ILI9341_CMD(0x11); // Exit Sleep
+    rg_usleep(10 * 1000);// Wait 10ms after sleep out
+    ILI9341_CMD(0x29); // Display on
+
+2.按键gpio模式 config.h 第46行
+#if 0
+// Input
+// Refer to rg_input.h to see all available RG_KEY_* and RG_GAMEPAD_*_MAP types
+#define RG_GAMEPAD_ADC_MAP {\
+    {RG_KEY_UP,    ADC_UNIT_1, ADC_CHANNEL_5, ADC_ATTEN_DB_11, 3072, 4096},\
+    {RG_KEY_RIGHT, ADC_UNIT_1, ADC_CHANNEL_6, ADC_ATTEN_DB_11, 1024, 3071},\
+    {RG_KEY_DOWN,  ADC_UNIT_1, ADC_CHANNEL_5, ADC_ATTEN_DB_11, 1024, 3071},\
+    {RG_KEY_LEFT,  ADC_UNIT_1, ADC_CHANNEL_6, ADC_ATTEN_DB_11, 3072, 4096},\
+}
+#define RG_GAMEPAD_GPIO_MAP {\
+    {RG_KEY_SELECT, .num = GPIO_NUM_16, .pullup = 1, .level = 0},\
+    {RG_KEY_START,  .num = GPIO_NUM_17, .pullup = 1, .level = 0},\
+    {RG_KEY_MENU,   .num = GPIO_NUM_18, .pullup = 1, .level = 0},\
+    {RG_KEY_OPTION, .num = GPIO_NUM_8,  .pullup = 1, .level = 0},\
+    {RG_KEY_A,      .num = GPIO_NUM_15, .pullup = 1, .level = 0},\
+    {RG_KEY_B,      .num = GPIO_NUM_5,  .pullup = 1, .level = 0},\
+}
+#endif 
+
+#define RG_GAMEPAD_ADC1_MAP {\
+}
+
+#define RG_GAMEPAD_GPIO_MAP {\
+    {RG_KEY_UP,     .num = GPIO_NUM_7,  .pullup = 1, .level = 0},\
+    {RG_KEY_RIGHT,  .num = GPIO_NUM_6,  .pullup = 1, .level = 0},\
+    {RG_KEY_DOWN,   .num = GPIO_NUM_46, .pullup = 1, .level = 0},\
+    {RG_KEY_LEFT,   .num = GPIO_NUM_45, .pullup = 1, .level = 0},\
+    {RG_KEY_SELECT, .num = GPIO_NUM_16, .pullup = 1, .level = 0},\
+    {RG_KEY_START,  .num = GPIO_NUM_17, .pullup = 1, .level = 0},\
+    {RG_KEY_MENU,   .num = GPIO_NUM_18, .pullup = 1, .level = 0},\
+    {RG_KEY_OPTION, .num = GPIO_NUM_8,  .pullup = 1, .level = 0},\
+    {RG_KEY_A,      .num = GPIO_NUM_15, .pullup = 1, .level = 0},\
+    {RG_KEY_B,      .num = GPIO_NUM_5,  .pullup = 1, .level = 0},\
+}
+
+3.rom on flash  
+
+ config.h 
+
+// Storage
+#define RG_STORAGE_ROOT             "/sd"
+// #define RG_STORAGE_SDSPI_HOST       SPI3_HOST
+// #define RG_STORAGE_SDSPI_SPEED      SDMMC_FREQ_DEFAULT
+// #define RG_STORAGE_SDMMC_HOST       SDMMC_HOST_SLOT_1
+// #define RG_STORAGE_SDMMC_SPEED      SDMMC_FREQ_DEFAULT
+#define RG_STORAGE_FLASH_PARTITION  "vfs"
+
+rg_tool.py   增加  --fatsize 5M
+
+
 # Table of contents
 - [Description](#description)
 - [Installation](#installation)
