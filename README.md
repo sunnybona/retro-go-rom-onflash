@@ -1,9 +1,6 @@
 How do I store the ROM in flash?
 
-1.修改默认为st7789
-
 ili9341.h 241行 修改为
-
 #if 0
     ILI9341_CMD(0x01);          // Reset
     rg_usleep(5 * 1000);        // Wait 5ms after reset
